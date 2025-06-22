@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register-Face Recognition</title>
+</head>
+<style>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: sans-serif;
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .register-container {
+            background-color: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 320px;
+            text-align: center;
+        }
+
+        h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .camera_container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        video, canvas {
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+
+        button {
+            padding: 10px 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #message {
+            margin-top: 15px;
+            color: green;
+            font-size: 14px;
+        }
+    </style>
+</style>
+<body>
+    <div class="register-container">
+        <h2>Register With Face</h2>
+        <form action="" id="register-form" method="POST">
+            
+            <input type="text" id="username" name="username" placeholder="Enter your name" required>
+            <div class="camera_container">
+                <video id="video" width="300" height="200" autoplay></video>
+                <button type="button" id="capture-button">Capture Face</button>
+                <canvas id="canvas" width="300" height="200"></canvas>
+            </div>
+            <button type="submit">Register</button>
+        </form>
+        <div id="message"></div>
+    </div>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const captureButton = document.getElementById('capture-button');
+        const registerform = document.getElementById('register-form');
+        const messageDiv = document.getElementById('message');
+        const video = document.getElementById('video');
+        let capturedImage = null;
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then((stream) => {
+                video.srcObject = stream;
+            })
+            .catch(err => {
+                console.error("Error accessing webcam: ", err);
+                messageDiv.textContent = "Error accessing webcam.";
+            });
+        captureButton.addEventListener('click', () => {
+            if (!video.srcObject) {
+                messageDiv.textContent = "Webcam not available.";
+                return;
+            }
+            const context = canvas.getContext('2d');
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            capturedImage = canvas.toDataURL('image/png');
+            messageDiv.textContent = "Face captured! You can now register.";
+        });
+    </script>
+</body>
+</html>

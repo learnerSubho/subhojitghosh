@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Face Login with Liveness Check</title>
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #f2f2f2;
+      font-family: Arial, sans-serif;
+    }
+
+    .container {
+      text-align: center;
+      padding: 20px;
+      border-radius: 10px;
+      background-color: white;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    }
+
+    video {
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    #status {
+      margin-top: 15px;
+      color: #333;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Face Login with Blink Liveness Check</h2>
+    <video id="video" width="320" height="240" autoplay muted></video><br/>
+    <button id="loginBtn">Login with Face</button>
+    <p id="status"></p>
+  </div>
+
+  <script>
+    const video = document.getElementById('video');
+    const loginBtn = document.getElementById('loginBtn');
+    const statusP = document.getElementById('status');
+
+    // Access webcam
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(stream => {
+        video.srcObject = stream;
+      })
+      .catch(err => {
+        statusP.textContent = 'Error accessing webcam: ' + err;
+      });
+
+    // Capture frames from video
+    function captureFrames(duration = 2000, fps = 5) {
+      return new Promise((resolve) => {
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth || 320;
+        canvas.height = video.videoHeight || 240;
+        const ctx = canvas.getContext('2d');
+
+        const frames = [];
+        const interval = 1000 / fps;
+        let elapsed = 0;
+
+        const captureInterval = setInterval(() => {
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          const dataURL = canvas.toDataURL('image/jpeg');
+          frames.push(dataURL);
+
+          elapsed += interval;
+          if (elapsed >= duration) {
+            clearInterval(captureInterval);
+            resolve(frames);
+          }
+        }, interval);
+      });
+    }
+
+    loginBtn.onclick = async () => {
+      statusP.textContent = 'Capturing frames, please blink naturally...';
+
+      try {
+        const frames = await captureFrames(2000, 5); // 2 seconds, 5 fps
+
+        statusP.textContent = 'Sending frames for verification...';
+
+        const response = await fetch('/admin_corner/face_login/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ frames })
+        });
+
+        const contentType = response.headers.get("content-type");
+
+        if (contentType && contentType.includes("application/json")) {
+          const result = await response.json();
+
+          if (result.success) {
+            statusP.textContent = 'Login successful! Redirecting...';
+            window.location.href = result.redirect_url;
+          } else {
+            statusP.textContent = 'Login failed: ' + (result.error || 'Unknown error');
+          }
+        } else {
+          const text = await response.text();
+          statusP.textContent = 'Server returned non-JSON response: ' + text.slice(0, 100);
+        }
+
+      } catch (err) {
+        statusP.textContent = 'Error during login: ' + err.message;
+      }
+    };
+  </script>
+</body>
+</html>

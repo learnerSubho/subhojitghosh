@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Success!</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes pop {
+      0% {
+        transform: scale(0.7);
+        opacity: 0;
+      }
+      100% {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .pop-animation {
+      animation: pop 0.6s ease-out forwards;
+    }
+
+    .confetti {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .confetti-piece {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background-color: #facc15;
+      opacity: 0.8;
+      animation: fall 3s infinite ease-in;
+    }
+
+    @keyframes fall {
+      0% {
+        transform: translateY(-100px) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-purple-500 via-pink-500 to-yellow-400 flex items-center justify-center h-screen overflow-hidden relative">
+
+  <!-- Confetti Container -->
+  <div class="confetti" id="confetti"></div>
+
+  <!-- Success Card -->
+  <div class="bg-white rounded-2xl shadow-2xl p-10 text-center max-w-md mx-auto pop-animation z-10">
+    <div class="text-green-500 mb-4">
+      <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-16 w-16 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+      </svg>
+    </div>
+    <h1 class="text-3xl font-bold text-gray-800">Success!</h1>
+    <p class="text-gray-600 mt-2">Your action was completed successfully.</p>
+    <a href='{% url "index" %}'><button onclick="window.location.href='/'" class="mt-6 px-6 py-2 rounded-full bg-green-500 text-white hover:bg-green-600 transition-all duration-300">Go Home</button></a>
+  </div>
+
+  <!-- JavaScript Confetti -->
+  <script>
+    const confettiContainer = document.getElementById('confetti');
+    const colors = ['#facc15', '#4ade80', '#60a5fa', '#f472b6', '#a78bfa'];
+
+    for (let i = 0; i < 100; i++) {
+      const confetti = document.createElement('div');
+      confetti.classList.add('confetti-piece');
+      confetti.style.left = `${Math.random() * 100}vw`;
+      confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+      confetti.style.animationDelay = `${Math.random() * 3}s`;
+      confettiContainer.appendChild(confetti);
+    }
+  </script>
+
+</body>
+</html>
