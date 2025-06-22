@@ -1,0 +1,8 @@
+# Byte-code cache
+__pycache__/
+*.py[cod]
+
+# Local virtual environment
+env/
+venv/
+.venv/
